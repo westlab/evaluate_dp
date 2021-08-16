@@ -14,16 +14,14 @@ PARAMS: list[str] = ['mean', 'std']
 
 class DPEvaluator:
     data_frame: pd.DataFrame
-    epsilon: float
     target_col: dict[str, ColumnInfo]
 
     results = dict[str, dict[str, np.ndarray]]
     exp_params = dict[str, dict[str, dict[str, float]]]
     got_params = dict[str, dict[str, dict[str, float]]]
 
-    def __init__(self, data_frame: pd.DataFrame, epsilon: float, target_col: dict[str, ColumnInfo]):
+    def __init__(self, data_frame: pd.DataFrame, target_col: dict[str, ColumnInfo]):
         self.data_frame = data_frame
-        self.epsilon = epsilon
         self.target_col = target_col
         self.results = {'mean': {}, 'std': {}}
         self.exp_params = {'mean': {}, 'std': {}}
@@ -32,18 +30,19 @@ class DPEvaluator:
     def exec_dp(self, exec_times: int = 10000) -> None:
         n = len(self.data_frame.index)
         for col, val in self.target_col.items():
+            epsilon = val.epsilon
             self.results['mean'][col] = np.array([])
             self.results['std'][col] = np.array([])
             span = val.span()
             l1_mean = span / n
             l1_std = span * math.sqrt(1.0 / n - 1.0 / n ** 2)
             self.exp_params['mean'][col] = {'mean': np.mean(self.data_frame[col]),
-                                            'std': math.sqrt(2) * l1_mean / self.epsilon}
+                                            'std': math.sqrt(2) * l1_mean / epsilon}
             self.exp_params['std'][col] = {'mean': np.std(self.data_frame[col]),
-                                           'std': math.sqrt(2) * l1_std / self.epsilon}
+                                           'std': math.sqrt(2) * l1_std / epsilon}
 
         for i in range(exec_times):
-            result = apply_for_plain(self.data_frame, self.epsilon, self.target_col)
+            result = apply_for_plain(self.data_frame, self.target_col)
             for col in self.target_col.keys():
                 self.results['mean'][col] = np.append(self.results['mean'][col], result[col]['mean'])
                 self.results['std'][col] = np.append(self.results['std'][col], result[col]['std'])

@@ -1,14 +1,13 @@
 import pandas as pd
 
-from dp.evaluator import DPEvaluator
-from dp.columninfo import ColumnInfo
+from dp.table import new_table_from_yaml
 
 if __name__ == '__main__':
     input_file = './data/data.csv'
+    conf_file = './data/conf.yaml'
     df = pd.read_csv(input_file)
-    epsilon = 3.0
-    target_col = {'value': ColumnInfo(0.0, 100.0)}
-    evaluator = DPEvaluator(df, epsilon, target_col)
+    table = new_table_from_yaml(df, conf_file)
+    evaluator = table.create_evaluator()
     evaluator.exec_dp(10000)
     evaluator.show_summary()
     result = evaluator.get_result()

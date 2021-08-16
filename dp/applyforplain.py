@@ -14,11 +14,12 @@ def generate_noise(epsilon: float, l1_sensitive: float) -> float:
     return float(r[0])
 
 
-def apply_for_plain(data_frame: pd.DataFrame, epsilon: float, value_range: dict[str, ColumnInfo]) \
+def apply_for_plain(data_frame: pd.DataFrame, value_range: dict[str, ColumnInfo]) \
         -> dict[str, dict[str, float]]:
     n = len(data_frame.index)
     result = {}
     for col, vr in value_range.items():
+        epsilon = vr.epsilon
         span = vr.span()
         l1_mean = span / n
         l1_std = span * math.sqrt(1.0 / n - 1.0 / n ** 2)
