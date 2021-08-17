@@ -1,3 +1,4 @@
+from typing import Dict
 import pandas as pd
 
 from .columninfo import ColumnInfo, new_column_info_list_from_yaml
@@ -7,13 +8,13 @@ from .evaluator import DPEvaluator
 
 class Table:
     data: pd.DataFrame
-    dp_conf: dict[str, ColumnInfo]
+    dp_conf: Dict[str, ColumnInfo]
 
-    def __init__(self, data_frame: pd.DataFrame, dp_conf: dict[str, ColumnInfo]):
+    def __init__(self, data_frame: pd.DataFrame, dp_conf: Dict[str, ColumnInfo]):
         self.data = data_frame
         self.dp_conf = dp_conf
 
-    def apply_dp(self) -> dict[str, dict[str, float]]:
+    def apply_dp(self) -> Dict[str, Dict[str, float]]:
         return apply_for_plain(self.data, self.dp_conf)
 
     def create_evaluator(self) -> DPEvaluator:

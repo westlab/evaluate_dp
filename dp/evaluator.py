@@ -1,5 +1,6 @@
 import datetime
 import math
+from typing import Dict, List
 
 import numpy as np
 import pandas as pd
@@ -9,18 +10,18 @@ from .applyforplain import apply_for_plain
 from .columninfo import ColumnInfo
 from .dputil import with_indent
 
-PARAMS: list[str] = ['mean', 'std']
+PARAMS: List[str] = ['mean', 'std']
 
 
 class DPEvaluator:
     data_frame: pd.DataFrame
-    target_col: dict[str, ColumnInfo]
+    target_col: Dict[str, ColumnInfo]
 
-    results = dict[str, dict[str, np.ndarray]]
-    exp_params = dict[str, dict[str, dict[str, float]]]
-    got_params = dict[str, dict[str, dict[str, float]]]
+    results = Dict[str, Dict[str, np.ndarray]]
+    exp_params = Dict[str, Dict[str, Dict[str, float]]]
+    got_params = Dict[str, Dict[str, Dict[str, float]]]
 
-    def __init__(self, data_frame: pd.DataFrame, target_col: dict[str, ColumnInfo]):
+    def __init__(self, data_frame: pd.DataFrame, target_col: Dict[str, ColumnInfo]):
         self.data_frame = data_frame
         self.target_col = target_col
         self.results = {'mean': {}, 'std': {}}
@@ -51,7 +52,7 @@ class DPEvaluator:
                 self.got_params[param][col] = {'mean': np.mean(self.results[param][col]),
                                                'std': np.std(self.results[param][col])}
 
-    def get_result(self) -> dict[str, dict[str, np.ndarray]]:
+    def get_result(self) -> Dict[str, Dict[str, np.ndarray]]:
         return self.results
 
     def show_summary(self) -> None:

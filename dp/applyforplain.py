@@ -1,3 +1,4 @@
+from typing import Dict
 import math
 
 import numpy as np
@@ -14,8 +15,8 @@ def generate_noise(epsilon: float, l1_sensitive: float) -> float:
     return float(r[0])
 
 
-def apply_for_plain(data_frame: pd.DataFrame, value_range: dict[str, ColumnInfo]) \
-        -> dict[str, dict[str, float]]:
+def apply_for_plain(data_frame: pd.DataFrame, value_range: Dict[str, ColumnInfo]) \
+        -> Dict[str, Dict[str, float]]:
     n = len(data_frame.index)
     result = {}
     for col, vr in value_range.items():

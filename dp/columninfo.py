@@ -1,4 +1,4 @@
-import pandas as pd
+from typing import Dict
 import yaml
 
 
@@ -18,14 +18,14 @@ class ColumnInfo:
         return self.max - self.min
 
 
-def new_column_info_from_dict(conf: dict[str, any]) -> ColumnInfo:
+def new_column_info_from_dict(conf: Dict[str, any]) -> ColumnInfo:
     return ColumnInfo(conf['min'], conf['max'], conf['epsilon'])
 
 
-def new_column_info_list_from_yaml(file_name: str) -> dict[str, ColumnInfo]:
+def new_column_info_list_from_yaml(file_name: str) -> Dict[str, ColumnInfo]:
     with open(file_name) as f:
         obj = yaml.safe_load(f)
-    info_list: dict[str, ColumnInfo] = {}
+    info_list: Dict[str, ColumnInfo] = {}
     for k, val in obj['columns'].items():
         info_list[k] = new_column_info_from_dict(val)
 
