@@ -1,6 +1,6 @@
 import datetime
 import math
-from typing import Dict, List
+from typing import Dict, List, Union
 
 import numpy as np
 import pandas as pd
@@ -8,25 +8,28 @@ import matplotlib.pyplot as plt
 
 from .applyforplain import apply_for_plain
 from .columninfo import ColumnInfo
-from .dputil import with_indent
+from .dputil import with_indent, NumberType
 
 PARAMS: List[str] = ['mean', 'std']
+EPS: float = 1e-4
 
 
 class DPEvaluator:
     data_frame: pd.DataFrame
     target_col: Dict[str, ColumnInfo]
+    output_int: bool
 
     results = Dict[str, Dict[str, np.ndarray]]
-    exp_params = Dict[str, Dict[str, Dict[str, float]]]
-    got_params = Dict[str, Dict[str, Dict[str, float]]]
+    exp_params = Dict[str, Dict[str, Dict[str, NumberType]]]
+    got_params = Dict[str, Dict[str, Dict[str, NumberType]]]
 
-    def __init__(self, data_frame: pd.DataFrame, target_col: Dict[str, ColumnInfo]):
+    def __init__(self, data_frame: pd.DataFrame, target_col: Dict[str, ColumnInfo], output_int: bool = False):
         self.data_frame = data_frame
         self.target_col = target_col
         self.results = {'mean': {}, 'std': {}}
         self.exp_params = {'mean': {}, 'std': {}}
         self.got_params = {'mean': {}, 'std': {}}
+        self.output_int = output_int
 
     def exec_dp(self, exec_times: int = 10000) -> None:
         n = len(self.data_frame.index)
@@ -37,20 +40,30 @@ class DPEvaluator:
             span = val.span()
             l1_mean = span / n
             l1_std = span * math.sqrt(1.0 / n - 1.0 / n ** 2)
-            self.exp_params['mean'][col] = {'mean': np.mean(self.data_frame[col]),
-                                            'std': math.sqrt(2) * l1_mean / epsilon}
-            self.exp_params['std'][col] = {'mean': np.std(self.data_frame[col]),
-                                           'std': math.sqrt(2) * l1_std / epsilon}
+            if self.output_int:
+                self.exp_params['mean'][col] = {'mean': np.mean(self.data_frame[col]).astype(np.int64).item(),
+                                                'std': round(math.sqrt(2) * l1_mean / epsilon)}
+                self.exp_params['std'][col] = {'mean': np.std(self.data_frame[col]).astype(np.int64).item(),
+                                               'std': round(math.sqrt(2) * l1_std / epsilon)}
+            else:
+                self.exp_params['mean'][col] = {'mean': np.mean(self.data_frame[col]),
+                                                'std': math.sqrt(2) * l1_mean / epsilon}
+                self.exp_params['std'][col] = {'mean': np.std(self.data_frame[col]),
+                                               'std': math.sqrt(2) * l1_std / epsilon}
 
         for i in range(exec_times):
-            result = apply_for_plain(self.data_frame, self.target_col)
+            result = apply_for_plain(self.data_frame, self.target_col, self.output_int)
             for col in self.target_col.keys():
                 self.results['mean'][col] = np.append(self.results['mean'][col], result[col]['mean'])
                 self.results['std'][col] = np.append(self.results['std'][col], result[col]['std'])
         for col in self.target_col.keys():
             for param in PARAMS:
-                self.got_params[param][col] = {'mean': np.mean(self.results[param][col]),
-                                               'std': np.std(self.results[param][col])}
+                if self.output_int:
+                    self.got_params[param][col] = {'mean': np.mean(self.results[param][col]).astype(np.int64).item(),
+                                                   'std': np.std(self.results[param][col]).astype(np.int64).item()}
+                else:
+                    self.got_params[param][col] = {'mean': np.mean(self.results[param][col]),
+                                                   'std': np.std(self.results[param][col])}
 
     def get_result(self) -> Dict[str, Dict[str, np.ndarray]]:
         return self.results
@@ -83,7 +96,7 @@ class DPEvaluator:
         plotx = np.arange(target.min(), target.max(), 0.01)
         loc = self.exp_params[param][col]['mean']
         scale = self.exp_params[param][col]['std'] / np.sqrt(2)
-        pdf = np.exp(-abs(plotx - loc) / scale) / (2.0 * scale)
+        pdf = np.exp(-abs(plotx - loc) / (scale + EPS)) / (2.0 * (scale + EPS))
         plt.plot(plotx, pdf)
         fig.savefig(output_path)
         return op
