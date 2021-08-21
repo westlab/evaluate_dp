@@ -1,6 +1,6 @@
-from typing import Union, Type
+from typing import Union
 
-NumberType: Type = Union[int, float]
+NumberType = Union[int, float]
 
 
 def with_indent(indent: int, string: str) -> str:

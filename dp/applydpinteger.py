@@ -1,5 +1,5 @@
-from typing import Dict
 import math
+from typing import Dict
 
 import numpy as np
 import pandas as pd
@@ -15,8 +15,9 @@ def generate_noise(epsilon: float, l1_sensitive: float) -> float:
     return float(r[0])
 
 
-def apply_for_plain(data_frame: pd.DataFrame, value_range: Dict[str, ColumnInfo]) \
-        -> Dict[str, Dict[str, int]]:
+def apply_for_plain(
+    data_frame: pd.DataFrame, value_range: Dict[str, ColumnInfo]
+) -> Dict[str, Dict[str, int]]:
     n = len(data_frame.index)
     result = {}
     for col, vr in value_range.items():
