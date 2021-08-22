@@ -36,3 +36,23 @@ def apply_for_plain(
             result[col] = {"mean": mean_dp, "std": std_dp}
 
     return result
+
+
+def generate_noise_by_column(
+    data_count: int,
+    column: ColumnInfo,
+    output_int: bool = False,
+) -> Dict[str, NumberType]:
+    n = data_count
+    epsilon = column.epsilon
+    span = column.span()
+    l1_mean = span / n
+    l1_std = span * math.sqrt(1.0 / n - 1.0 / n ** 2)
+    mean_dp = generate_noise(epsilon, l1_mean)
+    std_dp = generate_noise(epsilon, l1_std)
+    if output_int:
+        result = {"mean": int(mean_dp), "std": int(std_dp)}
+    else:
+        result = {"mean": mean_dp, "std": std_dp}
+
+    return result

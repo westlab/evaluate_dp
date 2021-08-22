@@ -1,4 +1,5 @@
 cycler==0.10.0
+-e git+ssh://git@github.com/westlab/evaluate_dp.git@4e7a0ffc672d03c729375e40287f145759b9b1e0#egg=evaluate_dp
 kiwisolver==1.3.1
 matplotlib==3.3.4
 numpy==1.19.5

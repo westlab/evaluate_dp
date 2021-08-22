@@ -1,4 +1,4 @@
-from typing import Dict
+from typing import Any, Dict
 
 import yaml
 
@@ -30,6 +30,15 @@ def new_column_info_from_dict(
         return ColumnInfo(int(conf["min"]), int(conf["max"]), int(conf["epsilon"]))
     else:
         return ColumnInfo(conf["min"], conf["max"], conf["epsilon"])
+
+
+def new_column_info_list_from_dict(
+    obj: Dict[str, Any], output_int: bool = False
+) -> Dict[str, ColumnInfo]:
+    info_list: Dict[str, ColumnInfo] = {}
+    for k, val in obj["columns"].items():
+        info_list[k] = new_column_info_from_dict(val, output_int)
+    return info_list
 
 
 def new_column_info_list_from_yaml(
